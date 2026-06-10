@@ -1,10 +1,42 @@
 <html>
+<head>
+  <style>
+    .rec-btn {
+  position: fixed;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  background: red;
+  border: 4px solid white;
+  box-shadow: 0 0 10px rgba(0,0,0,0.5);
+}
+
+.stop-btn {
+  position: fixed;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  background: white;
+  border: 4px solid red;
+  display: none;
+}
+  </style>
+</head>
 <body style="margin:0; background:black;">
 
 <video id="preview" autoplay playsinline style="width:100%; height:100%; object-fit:cover;"></video>
 
-<button id="startRec" style="width:100%; height:60px; font-size:20px;">⚪︎</button>
-<button id="stopRec" style="width:100%; height:60px; font-size:20px;">×</button>
+<button id="startRec" class="rec-btn"></button>
+<button id="stopRec" class="stop-btn"></button>
+
+//<button id="startRec" style="width:100%; //height:60px; font-size:20px;">⚪︎</button>
+//<button id="stopRec" style="width:100%; //height:60px; font-size:20px;">×</button>
 
 <script>
 let stream;
@@ -22,6 +54,8 @@ async function startCamera() {
 
 // 録画開始
 document.getElementById("startRec").onclick = () => {
+document.getElementById("startRec").style.display = "none";
+document.getElementById("stopRec").style.display = "block";
   chunks = [];
   recorder = new MediaRecorder(stream, { mimeType: "video/webm" });
   recorder.ondataavailable = e => chunks.push(e.data);
@@ -33,9 +67,10 @@ document.getElementById("startRec").onclick = () => {
     a.href = url;
     a.download = "recorded.webm";
     a.click();
-    document.getElementById("startRec").style.display = "block";
+    
+document.getElementById("startRec").style.display = "block";
+document.getElementById("stopRec").style.display = "none";
   };
-  document.getElementById("startRec").style.display = "none";
   recorder.start();
 };
 
