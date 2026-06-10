@@ -35,9 +35,6 @@
 <button id="startRec" class="rec-btn"></button>
 <button id="stopRec" class="stop-btn"></button>
 
-//<button id="startRec" style="width:100%; //height:60px; font-size:20px;">⚪︎</button>
-//<button id="stopRec" style="width:100%; //height:60px; font-size:20px;">×</button>
-
 <script>
 let stream;
 let recorder;
