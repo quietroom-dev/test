@@ -4,7 +4,7 @@
 
 <video id="preview" autoplay playsinline style="width:100%;"></video>
 
-<button id="startRec" style="width:100%; height:60px; font-size:20px;">録画開始</button>
+<button id="startRec" style="width:50%; height:60px; font-size:20px;">録画開始</button>
 <button id="stopRec" style="width:100%; height:60px; font-size:20px;">録画停止</button>
 
 <script>
