@@ -1,4 +1,3 @@
-<!DOCTYPE html>
 <html>
 <body style="margin:0; background:black;">
 
