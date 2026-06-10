@@ -33,8 +33,9 @@ document.getElementById("startRec").onclick = () => {
     a.href = url;
     a.download = "recorded.webm";
     a.click();
+    document.getElementById("startRec").style.display = "block";
   };
-
+  document.getElementById("startRec").style.display = "none";
   recorder.start();
 };
 
