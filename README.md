@@ -18,7 +18,7 @@ async function startCamera() {
     video: { facingMode: "environment" },
     audio: true
   });
-  document.getElementById("preview").srcObject = stream;
+  //document.getElementById("preview").srcObject = stream;
 }
 
 // 録画開始
