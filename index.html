@@ -46,6 +46,8 @@ async function startCamera() {
     video: { facingMode: "environment" },
     audio: true
   });
+  video.muted = true;
+  video.volume = 0;
   document.getElementById("preview").srcObject = stream;
 }
 
