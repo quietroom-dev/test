@@ -27,7 +27,7 @@
   border: none;
   border-radius: 999px;        /* 角を丸く（横長カプセル） */
   padding: 30px 120px;          /* 横長にする */
-  font-size: 30px;
+  font-size: 35px;
   font-weight: 600;
   cursor: pointer;
 }
@@ -70,7 +70,6 @@ async function startCamera() {
 // 録画開始
 document.getElementById("startRec").onclick = () => {
 document.getElementById("startRec").style.display = "none";
-document.getElementById("stopBtn").style.display = "block";
   chunks = [];
   recorder = new MediaRecorder(stream, { mimeType: "video/webm" });
   recorder.ondataavailable = e => chunks.push(e.data);
@@ -96,7 +95,6 @@ document.getElementById("stopBtn").style.display = "block";
   a.click();
 
   document.getElementById("startRec").style.display = "block";
-  document.getElementById("stopBtn").style.display = "none";
 };
   recorder.start();
 };
