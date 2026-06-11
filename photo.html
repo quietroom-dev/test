@@ -47,12 +47,13 @@
   <video id="preview" autoplay playsinline style="width:100%; height:100%; object-fit:cover;"></video>
 
   <button id="startRec" class="rec-btn"></button>
-  <button id="stopBtn" class="cta-btn">無料アプリで見る</button>
+  <button id="stopBtn" class="cta-btn">保存する</button>
 
   <canvas id="canvas" style="display:none;"></canvas>
 
 <script>
 let stream;
+let photos = []; // ← 撮影した写真をためる配列
 
 // カメラ起動（外カメラ）
 async function startCamera() {
@@ -65,7 +66,7 @@ async function startCamera() {
   video.srcObject = stream;
 }
 
-// ★ 写真撮影（Canvasに描画 → PNG保存）
+// ★ 写真撮影（配列にためる）
 function takePhoto() {
   const video = document.getElementById("preview");
   const canvas = document.getElementById("canvas");
@@ -76,11 +77,16 @@ function takePhoto() {
   const ctx = canvas.getContext("2d");
   ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-  // PNGデータ生成
   canvas.toBlob((blob) => {
+    photos.push(blob); // ← 保存せずにためるだけ
+  }, "image/png");
+}
+
+// ★ 全部保存（1枚ずつダウンロード開始）
+function saveAllPhotos() {
+  photos.forEach((blob, index) => {
     const url = URL.createObjectURL(blob);
 
-    // ★ 日時形式のファイル名
     const now = new Date();
     const filename =
       now.getFullYear() + "-" +
@@ -89,30 +95,28 @@ function takePhoto() {
       String(now.getHours()).padStart(2, "0") + "-" +
       String(now.getMinutes()).padStart(2, "0") + "-" +
       String(now.getSeconds()).padStart(2, "0") +
-      ".png";
+      "-" + index + ".png";
 
     const a = document.createElement("a");
     a.href = url;
     a.download = filename;
     a.click();
+  });
 
-    // UI戻す
-    document.getElementById("startRec").style.display = "block";
-    document.getElementById("stopBtn").style.display = "none";
-  }, "image/png");
+  // 保存後リセット
+  photos = [];
+  document.getElementById("stopBtn").style.display = "none";
+  document.getElementById("startRec").style.display = "block";
 }
 
-// ● 黒丸ボタン → 写真撮影モードへ
+// ● 黒丸ボタン → 撮影（ためる）
 document.getElementById("startRec").onclick = () => {
-  document.getElementById("startRec").style.display = "none";
-  document.getElementById("stopBtn").style.display = "block";
-
-  // すぐ撮影
   takePhoto();
+  document.getElementById("stopBtn").style.display = "block"; // 保存ボタン表示
 };
 
-// ● オレンジボタン → もう一度撮影
-document.getElementById("stopBtn").onclick = () => takePhoto();
+// ● オレンジボタン → 全部保存
+document.getElementById("stopBtn").onclick = saveAllPhotos;
 
 startCamera();
 </script>
