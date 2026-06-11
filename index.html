@@ -1,108 +1,395 @@
+```html
+<!DOCTYPE html>
 <html>
 <head>
-  <meta name="apple-mobile-web-app-capable" content="yes">
+<meta charset="utf-8">
+
+<meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
 
-  <style>
-    .rec-btn {
-  position: fixed;
-  bottom: 200px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 70px;
-  height: 70px;
-  border-radius: 50%;
-  background: black;
-  border: 4px solid white;
-  box-shadow: 0 0 10px rgba(0,0,0,0.5);
+<style>
+
+.rec-btn{
+  position:fixed;
+  bottom:200px;
+  left:50%;
+  transform:translateX(-50%);
+  width:70px;
+  height:70px;
+  border-radius:50%;
+  background:black;
+  border:4px solid white;
+  box-shadow:0 0 10px rgba(0,0,0,.5);
 }
 
-.cta-btn {
-  position: fixed;
-  bottom: 500px;     /* 好きな高さに調整 */
-  left: 50%;
-  transform: translateX(-50%);
-  background-color: #ff8800;   /* オレンジ */
-  color: #ffffff;              /* 白文字 */
-  border: none;
-  border-radius: 999px;        /* 角を丸く（横長カプセル） */
-  padding: 30px 110px;          /* 横長にする */
-  font-size: 30px;
-  font-weight: 600;
-  cursor: pointer;
+.cta-btn{
+  position:fixed;
+  bottom:500px;
+  left:50%;
+  transform:translateX(-50%);
+  background:#ff8800;
+  color:#fff;
+  border:none;
+  border-radius:999px;
+  padding:30px 110px;
+  font-size:30px;
+  font-weight:600;
 }
 
-/* 必要ならホバー時 */
-.cta-btn:active,
-.cta-btn:hover {
-  background-color: #ff9900;
+.cta-btn:active{
+  background:#ff9900;
 }
-body {
-  background-image: url("./IMG_4318.png");
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
+
+body{
+  margin:0;
+  overflow:hidden;
+
+  background-image:url("./IMG_4318.png");
+  background-size:cover;
+  background-position:center;
+  background-repeat:no-repeat;
 }
-  </style>
+
+#preview{
+  position:fixed;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+
+</style>
 </head>
-<body style="margin:0;">
-<video id="preview" autoplay playsinline style="width:100%; height:100%; object-fit:cover;"></video>
+
+<body>
+
+<video
+  id="preview"
+  autoplay
+  playsinline
+  muted>
+</video>
 
 <button id="startRec" class="rec-btn"></button>
-<button id="stopBtn" class="cta-btn">無料アプリで見る</button>
+<button id="stopBtn" class="cta-btn">
+無料アプリで見る
+</button>
 
 <script>
-let stream;
-let recorder;
-let chunks = [];
 
-// カメラ起動（外カメラ）
-async function startCamera() {
-  stream = await navigator.mediaDevices.getUserMedia({
-    video: { facingMode: "environment" },
-    audio: true
-  });
-  video.muted = true;
-  video.volume = 0;
-  //document.getElementById("preview").srcObject = stream;
+let stream = null;
+let recorder = null;
+let chunks = [];
+let mimeType = "";
+
+const video = document.getElementById("preview");
+const startBtn = document.getElementById("startRec");
+const stopBtn = document.getElementById("stopBtn");
+
+
+// --------------------
+// 対応形式判定
+// --------------------
+function getSupportedMimeType(){
+
+  const candidates = [
+    "video/mp4",
+    "video/webm;codecs=h264",
+    "video/webm;codecs=vp9",
+    "video/webm"
+  ];
+
+  for(const type of candidates){
+
+    try{
+
+      if(MediaRecorder.isTypeSupported(type)){
+        return type;
+      }
+
+    }catch(e){}
+  }
+
+  return "";
 }
 
+
+// --------------------
+// カメラ停止
+// --------------------
+function stopCamera(){
+
+  if(!stream) return;
+
+  stream.getTracks().forEach(track=>{
+    track.stop();
+  });
+
+  stream = null;
+}
+
+
+// --------------------
+// カメラ起動
+// --------------------
+async function startCamera(){
+
+  try{
+
+    stopCamera();
+
+    stream =
+      await navigator.mediaDevices.getUserMedia({
+
+        video:{
+          facingMode:{
+            ideal:"environment"
+          }
+        },
+
+        audio:true
+
+      });
+
+    video.srcObject = stream;
+
+    video.muted = true;
+    video.volume = 0;
+
+    await video.play();
+
+    console.log("camera started");
+
+  }catch(err){
+
+    console.error(err);
+
+    alert("カメラ起動に失敗しました");
+  }
+}
+
+
+// --------------------
+// 生存確認
+// --------------------
+async function ensureCameraAlive(){
+
+  const alive =
+    stream &&
+    stream.active &&
+    stream.getVideoTracks().length > 0 &&
+    stream.getVideoTracks()[0].readyState === "live";
+
+  if(!alive){
+
+    console.log("camera restart");
+
+    await startCamera();
+  }
+}
+
+
+// --------------------
 // 録画開始
-document.getElementById("startRec").onclick = () => {
-document.getElementById("startRec").style.display = "none";
-  chunks = [];
-  recorder = new MediaRecorder(stream, { mimeType: "video/webm" });
-  recorder.ondataavailable = e => chunks.push(e.data);
+// --------------------
+async function startRecording(){
 
-    recorder.onstop = () => {
-  const blob = new Blob(chunks, { type: "video/webm" });
-  const url = URL.createObjectURL(blob);
+  try{
 
-  // ★ 日時形式のファイル名を生成
-  const now = new Date();
-  const filename =
-    now.getFullYear() + "-" +
-    String(now.getMonth() + 1).padStart(2, "0") + "-" +
-    String(now.getDate()).padStart(2, "0") + "_" +
-    String(now.getHours()).padStart(2, "0") + "-" +
-    String(now.getMinutes()).padStart(2, "0") + "-" +
-    String(now.getSeconds()).padStart(2, "0") +
-    ".webm";
+    await ensureCameraAlive();
 
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = filename;   // ← 自動生成した日時名で保存
-  a.click();
+    chunks = [];
 
-  document.getElementById("startRec").style.display = "block";
-};
-  recorder.start();
-};
+    recorder =
+      mimeType
+      ? new MediaRecorder(stream,{mimeType})
+      : new MediaRecorder(stream);
 
+    recorder.ondataavailable = e => {
+
+      if(e.data && e.data.size > 0){
+        chunks.push(e.data);
+      }
+
+    };
+
+    recorder.onerror = e => {
+      console.error(e);
+    };
+
+    recorder.onstop = saveRecording;
+
+    recorder.start(1000);
+
+    startBtn.style.display = "none";
+
+    console.log("recording started");
+
+  }catch(err){
+
+    console.error(err);
+
+    alert("録画開始に失敗しました");
+  }
+}
+
+
+// --------------------
+// 保存
+// --------------------
+async function saveRecording(){
+
+  try{
+
+    if(chunks.length === 0){
+
+      alert("録画データがありません");
+
+      startBtn.style.display = "block";
+
+      return;
+    }
+
+    const extension =
+      mimeType.includes("mp4")
+      ? "mp4"
+      : "webm";
+
+    const blob =
+      new Blob(chunks,{
+        type:mimeType
+      });
+
+    const url =
+      URL.createObjectURL(blob);
+
+    const now = new Date();
+
+    const filename =
+      now.getFullYear() + "-" +
+      String(now.getMonth()+1).padStart(2,"0") + "-" +
+      String(now.getDate()).padStart(2,"0") + "_" +
+      String(now.getHours()).padStart(2,"0") + "-" +
+      String(now.getMinutes()).padStart(2,"0") + "-" +
+      String(now.getSeconds()).padStart(2,"0") +
+      "." + extension;
+
+    const a =
+      document.createElement("a");
+
+    a.href = url;
+    a.download = filename;
+
+    document.body.appendChild(a);
+
+    a.click();
+
+    a.remove();
+
+    setTimeout(()=>{
+      URL.revokeObjectURL(url);
+    },5000);
+
+    startBtn.style.display = "block";
+
+    console.log("saved");
+
+    // iPhone対策
+    await startCamera();
+
+  }catch(err){
+
+    console.error(err);
+  }
+}
+
+
+// --------------------
 // 録画停止
-document.getElementById("stopBtn").onclick = () => recorder.stop();
+// --------------------
+function stopRecording(){
 
-startCamera();
+  if(
+    recorder &&
+    recorder.state === "recording"
+  ){
+    recorder.stop();
+  }
+}
+
+
+// --------------------
+// スリープ復帰
+// --------------------
+document.addEventListener(
+  "visibilitychange",
+  async ()=>{
+
+    if(!document.hidden){
+
+      try{
+
+        await ensureCameraAlive();
+
+      }catch(err){
+
+        console.error(err);
+      }
+    }
+  }
+);
+
+
+// --------------------
+// ページ復帰
+// --------------------
+window.addEventListener(
+  "pageshow",
+  async ()=>{
+
+    try{
+
+      await ensureCameraAlive();
+
+    }catch(err){
+
+      console.error(err);
+    }
+  }
+);
+
+
+// --------------------
+// ボタン
+// --------------------
+startBtn.addEventListener(
+  "click",
+  startRecording
+);
+
+stopBtn.addEventListener(
+  "click",
+  stopRecording
+);
+
+
+// --------------------
+// 初期化
+// --------------------
+(async()=>{
+
+  mimeType =
+    getSupportedMimeType();
+
+  console.log(
+    "mimeType:",
+    mimeType
+  );
+
+  await startCamera();
+
+})();
 </script>
 
 </body>
