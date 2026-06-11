@@ -75,17 +75,29 @@ document.getElementById("stopBtn").style.display = "block";
   recorder = new MediaRecorder(stream, { mimeType: "video/webm" });
   recorder.ondataavailable = e => chunks.push(e.data);
 
-  recorder.onstop = () => {
-    const blob = new Blob(chunks, { type: "video/webm" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "recorded.webm";
-    a.click();
-    
-document.getElementById("startRec").style.display = "block";
-document.getElementById("stopBtn").style.display = "none";
-  };
+    recorder.onstop = () => {
+  const blob = new Blob(chunks, { type: "video/webm" });
+  const url = URL.createObjectURL(blob);
+
+  // ★ 日時形式のファイル名を生成
+  const now = new Date();
+  const filename =
+    now.getFullYear() + "-" +
+    String(now.getMonth() + 1).padStart(2, "0") + "-" +
+    String(now.getDate()).padStart(2, "0") + "_" +
+    String(now.getHours()).padStart(2, "0") + "-" +
+    String(now.getMinutes()).padStart(2, "0") + "-" +
+    String(now.getSeconds()).padStart(2, "0") +
+    ".webm";
+
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;   // ← 自動生成した日時名で保存
+  a.click();
+
+  document.getElementById("startRec").style.display = "block";
+  document.getElementById("stopBtn").style.display = "none";
+};
   recorder.start();
 };
 
