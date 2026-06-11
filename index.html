@@ -17,33 +17,39 @@
   box-shadow: 0 0 10px rgba(0,0,0,0.5);
 }
 
-.stop-btn {
+.cta-btn {
   position: fixed;
-  bottom: 30px;
+  bottom: 120px;     /* 好きな高さに調整 */
   left: 50%;
   transform: translateX(-50%);
-  width: 200px;
-  height: 200px;
-  border-radius: 50%;
-  background: black;
-  border: 4px solid black;
-  display: none;
+  background-color: #ff8800;   /* オレンジ */
+  color: #ffffff;              /* 白文字 */
+  border: none;
+  border-radius: 999px;        /* 角を丸く（横長カプセル） */
+  padding: 12px 28px;          /* 横長にする */
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
 }
-  </style>
-</head>
-<body style="margin:0; background:white;">
-  body {
+
+/* 必要ならホバー時 */
+.cta-btn:active,
+.cta-btn:hover {
+  background-color: #ff9900;
+}
+body {
   background-image: url("IMG_4318.png");
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
 }
-
-
+  </style>
+</head>
+<body style="margin:0; background:white;">
 <video id="preview" autoplay playsinline style="width:100%; height:100%; object-fit:cover;"></video>
 
 <button id="startRec" class="rec-btn"></button>
-<button id="stopRec" class="stop-btn"></button>
+<button id="stopBtn" class="cta-btn">無料アプリで見る</button>
 
 <script>
 let stream;
@@ -64,7 +70,7 @@ async function startCamera() {
 // 録画開始
 document.getElementById("startRec").onclick = () => {
 document.getElementById("startRec").style.display = "none";
-document.getElementById("stopRec").style.display = "block";
+document.getElementById("stopBtn").style.display = "block";
   chunks = [];
   recorder = new MediaRecorder(stream, { mimeType: "video/webm" });
   recorder.ondataavailable = e => chunks.push(e.data);
@@ -78,13 +84,13 @@ document.getElementById("stopRec").style.display = "block";
     a.click();
     
 document.getElementById("startRec").style.display = "block";
-document.getElementById("stopRec").style.display = "none";
+document.getElementById("stopBtn").style.display = "none";
   };
   recorder.start();
 };
 
 // 録画停止
-document.getElementById("stopRec").onclick = () => recorder.stop();
+document.getElementById("stopBtn").onclick = () => recorder.stop();
 
 startCamera();
 </script>
