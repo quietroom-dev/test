@@ -1,0 +1,121 @@
+<html>
+<head>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+
+  <style>
+    .rec-btn {
+      position: fixed;
+      bottom: 200px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      background: black;
+      border: 4px solid white;
+      box-shadow: 0 0 10px rgba(0,0,0,0.5);
+    }
+
+    .cta-btn {
+      position: fixed;
+      bottom: 500px;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: #ff8800;
+      color: #ffffff;
+      border: none;
+      border-radius: 999px;
+      padding: 30px 140px;
+      font-size: 35px;
+      font-weight: 600;
+      cursor: pointer;
+      display: none; /* ← 最初は非表示 */
+    }
+
+    body {
+      background-image: url("./IMG_4318.png");
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      margin: 0;
+    }
+  </style>
+</head>
+
+<body>
+  <video id="preview" autoplay playsinline style="width:100%; height:100%; object-fit:cover;"></video>
+
+  <button id="startRec" class="rec-btn"></button>
+  <button id="stopBtn" class="cta-btn">無料アプリで見る</button>
+
+  <canvas id="canvas" style="display:none;"></canvas>
+
+<script>
+let stream;
+
+// カメラ起動（外カメラ）
+async function startCamera() {
+  stream = await navigator.mediaDevices.getUserMedia({
+    video: { facingMode: "environment" },
+    audio: false
+  });
+
+  const video = document.getElementById("preview");
+  video.srcObject = stream;
+}
+
+// ★ 写真撮影（Canvasに描画 → PNG保存）
+function takePhoto() {
+  const video = document.getElementById("preview");
+  const canvas = document.getElementById("canvas");
+
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
+
+  const ctx = canvas.getContext("2d");
+  ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+  // PNGデータ生成
+  canvas.toBlob((blob) => {
+    const url = URL.createObjectURL(blob);
+
+    // ★ 日時形式のファイル名
+    const now = new Date();
+    const filename =
+      now.getFullYear() + "-" +
+      String(now.getMonth() + 1).padStart(2, "0") + "-" +
+      String(now.getDate()).padStart(2, "0") + "_" +
+      String(now.getHours()).padStart(2, "0") + "-" +
+      String(now.getMinutes()).padStart(2, "0") + "-" +
+      String(now.getSeconds()).padStart(2, "0") +
+      ".png";
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    a.click();
+
+    // UI戻す
+    document.getElementById("startRec").style.display = "block";
+    document.getElementById("stopBtn").style.display = "none";
+  }, "image/png");
+}
+
+// ● 黒丸ボタン → 写真撮影モードへ
+document.getElementById("startRec").onclick = () => {
+  document.getElementById("startRec").style.display = "none";
+  document.getElementById("stopBtn").style.display = "block";
+
+  // すぐ撮影
+  takePhoto();
+};
+
+// ● オレンジボタン → もう一度撮影
+document.getElementById("stopBtn").onclick = () => takePhoto();
+
+startCamera();
+</script>
+
+</body>
+</html>
