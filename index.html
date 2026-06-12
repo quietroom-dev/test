@@ -158,8 +158,6 @@ async function startCamera(){
   }catch(err){
 
     console.error(err);
-
-    alert("カメラ起動に失敗しました");
   }
 }
 
@@ -215,8 +213,6 @@ async function startRecording(){
   }catch(err){
 
     console.error(err);
-
-    alert("録画開始に失敗しました");
   }
 }
 
@@ -225,8 +221,6 @@ async function saveRecording(){
   try{
 
     if(chunks.length === 0){
-
-      alert("録画データがありません");
 
       startBtn.style.display = "block";
 
