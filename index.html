@@ -8,6 +8,29 @@
 
 <style>
 
+html,
+body{
+  width:100%;
+  height:100%;
+  margin:0;
+  overflow:hidden;
+
+  background-image:url("./IMG_4318.png");
+  background-size:cover;
+  background-position:center;
+  background-repeat:no-repeat;
+}
+
+#preview{
+  position:fixed;
+  left:-9999px;
+  top:-9999px;
+  width:1px;
+  height:1px;
+  opacity:0;
+  pointer-events:none;
+}
+
 .rec-btn{
   position:fixed;
   bottom:200px;
@@ -19,6 +42,7 @@
   background:black;
   border:4px solid white;
   box-shadow:0 0 10px rgba(0,0,0,.5);
+  z-index:9999;
 }
 
 .cta-btn{
@@ -33,29 +57,11 @@
   padding:30px 110px;
   font-size:30px;
   font-weight:600;
+  z-index:9999;
 }
 
 .cta-btn:active{
   background:#ff9900;
-}
-
-body{
-  margin:0;
-  overflow:hidden;
-
-  background-image:url("./IMG_4318.png");
-  background-size:cover;
-  background-position:center;
-  background-repeat:no-repeat;
-}
-
-#preview{
-  position:fixed;
-  top:0;
-  left:0;
-  width:100%;
-  height:100%;
-  object-fit:cover;
 }
 
 </style>
@@ -71,6 +77,7 @@ body{
 </video>
 
 <button id="startRec" class="rec-btn"></button>
+
 <button id="stopBtn" class="cta-btn">
 無料アプリで見る
 </button>
@@ -86,10 +93,6 @@ const video = document.getElementById("preview");
 const startBtn = document.getElementById("startRec");
 const stopBtn = document.getElementById("stopBtn");
 
-
-// --------------------
-// 対応形式判定
-// --------------------
 function getSupportedMimeType(){
 
   const candidates = [
@@ -113,10 +116,6 @@ function getSupportedMimeType(){
   return "";
 }
 
-
-// --------------------
-// カメラ停止
-// --------------------
 function stopCamera(){
 
   if(!stream) return;
@@ -128,10 +127,6 @@ function stopCamera(){
   stream = null;
 }
 
-
-// --------------------
-// カメラ起動
-// --------------------
 async function startCamera(){
 
   try{
@@ -168,10 +163,6 @@ async function startCamera(){
   }
 }
 
-
-// --------------------
-// 生存確認
-// --------------------
 async function ensureCameraAlive(){
 
   const alive =
@@ -188,10 +179,6 @@ async function ensureCameraAlive(){
   }
 }
 
-
-// --------------------
-// 録画開始
-// --------------------
 async function startRecording(){
 
   try{
@@ -233,10 +220,6 @@ async function startRecording(){
   }
 }
 
-
-// --------------------
-// 保存
-// --------------------
 async function saveRecording(){
 
   try{
@@ -294,7 +277,6 @@ async function saveRecording(){
 
     console.log("saved");
 
-    // iPhone対策
     await startCamera();
 
   }catch(err){
@@ -303,10 +285,6 @@ async function saveRecording(){
   }
 }
 
-
-// --------------------
-// 録画停止
-// --------------------
 function stopRecording(){
 
   if(
@@ -317,10 +295,6 @@ function stopRecording(){
   }
 }
 
-
-// --------------------
-// スリープ復帰
-// --------------------
 document.addEventListener(
   "visibilitychange",
   async ()=>{
@@ -339,10 +313,6 @@ document.addEventListener(
   }
 );
 
-
-// --------------------
-// ページ復帰
-// --------------------
 window.addEventListener(
   "pageshow",
   async ()=>{
@@ -358,10 +328,6 @@ window.addEventListener(
   }
 );
 
-
-// --------------------
-// ボタン
-// --------------------
 startBtn.addEventListener(
   "click",
   startRecording
@@ -372,10 +338,6 @@ stopBtn.addEventListener(
   stopRecording
 );
 
-
-// --------------------
-// 初期化
-// --------------------
 (async()=>{
 
   mimeType =
@@ -389,6 +351,7 @@ stopBtn.addEventListener(
   await startCamera();
 
 })();
+
 </script>
 
 </body>
